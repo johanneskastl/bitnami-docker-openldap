@@ -463,19 +463,18 @@ ldap_initialize() {
         if is_boolean_yes "$LDAP_ENABLE_TLS"; then
             ldap_configure_tls
         fi
+        # Initialize OpenLDAP with schemas/tree structure
+        ldap_add_schemas
+        if [[ -f "$LDAP_CUSTOM_SCHEMA_FILE" ]]; then
+            ldap_add_custom_schema
+        fi
+        if ! is_dir_empty "$LDAP_CUSTOM_LDIF_DIR"; then
+            ldap_add_custom_ldifs
+        fi
         if is_boolean_yes "$LDAP_SKIP_DEFAULT_TREE"; then
             info "Skipping default schemas/tree structure"
         else
-            # Initialize OpenLDAP with schemas/tree structure
-            ldap_add_schemas
-            if [[ -f "$LDAP_CUSTOM_SCHEMA_FILE" ]]; then
-                ldap_add_custom_schema
-            fi
-            if ! is_dir_empty "$LDAP_CUSTOM_LDIF_DIR"; then
-                ldap_add_custom_ldifs
-            else
-                ldap_create_tree
-            fi
+            ldap_create_tree
         fi
         ldap_stop
     fi
